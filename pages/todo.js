@@ -1,46 +1,53 @@
 import Layout from './general/layout'
 import { fetchTodos } from '../helpers/fetch-data'
-import { Button, Table } from 'antd'
-import { useState } from 'react'
+import { Table, Modal } from 'antd'
+import getColumn from '../columns/todo'
+import { useEffect, useState } from 'react'
 
 const Todo = (props) => {
-    const [columns, setColumns] = useState([
-        {
-            title: 'userId',
-            dataIndex: 'userId',
-            key: 'userId',            
-        },
-        {
-            title: '#',
-            dataIndex: 'id',
-            key: 'id',            
-        },
-        {
-            title: 'Title',
-            dataIndex: 'title',
-            key: 'title',            
-        },
-        {
-            title: 'is complete?',
-            dataIndex: 'completed',
-            key: 'completed',
-            render: (text, record) => (
-                <span>{record.completed ? '✓': '✗'}</span>
-            ),
-        },
-        {
-            title: 'Action',
-            dataIndex: 'id',
-            key: 'action',
-            render: (text, record) => (
-                <Button type="primary">Detail</Button>
-            ),
+    const [isLoading, setIsLoading] = useState(true)
+    const [columns, setColumns] = useState([])
+
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
+    const showModal = () => {
+      setIsModalVisible(true);
+    };
+  
+    const handleOk = () => {
+      setIsModalVisible(false);
+    };
+  
+    const handleCancel = () => {
+      setIsModalVisible(false);
+    };    
+
+    useEffect(() => {
+        if (props.data) {
+            setIsLoading(false)
         }
-    ])
+    }, [props.data])
+
+    useEffect(() => {
+        setColumns(getColumn(showModal))
+    }, [])
+
     return (
         <Layout
             content={(
-                <Table dataSource={props.data} columns={columns} />
+                <>
+                    <Table
+                        rowKey='id'
+                        dataSource={props.data} 
+                        columns={columns} 
+                        loading={isLoading}
+                    />
+                    <Modal title="Basic Modal" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                        <p>Some contents...</p>
+                    </Modal>
+                </>
             )}
         />
     )
